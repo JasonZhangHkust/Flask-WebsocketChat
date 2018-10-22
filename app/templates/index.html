@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+    <div class="container">
+      <div class="starter-template">
+          <h1>Websocket Client Console</h1>
+          <p class="lead">This python Flask app will interaction with websocket server<br></p>
+          {% if current_user.is_authenticated %}
+          <h1>Hi, {{ current_user.username }}!</h1>
+          {% endif %}
+      </div>
+    </div><!-- /.container -->
+{% endblock %}
