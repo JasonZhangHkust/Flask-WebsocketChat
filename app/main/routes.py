@@ -4,6 +4,7 @@ from app import db, sockets, log
 from app.main.forms import EditProfileForm
 from app.models import User
 from app.main import bp
+from app.api.token import get_token
 
 
 @bp.route('/')
@@ -23,21 +24,6 @@ def user(username):
     return render_template('user.html', user=user, posts=posts)
 
 
-@bp.route('/chat')
-@login_required
-def chat():
-    return render_template('chat.html')
-
-
-@sockets.route('/echo')
-def echo_socket(ws):
-    while not ws.closed:
-        message = ws.receive()
-        log.debug("Message Receive %s", message)
-        if message:
-            ws.send(message)
-
-
 @bp.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
@@ -53,4 +39,17 @@ def edit_profile():
         form.about_me.data = current_user.about_me
     return render_template('edit_profile.html', title='Edit Profile',
                            form=form)
+
+
+@bp.route('/user/<username>/popup')
+@login_required
+def user_popup(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    return render_template('user_popup.html', user=user)
+
+
+@bp.route('/chat', methods=['GET', 'POST'])
+@login_required
+def chat():
+    return render_template('chat.html', user=current_user)
 

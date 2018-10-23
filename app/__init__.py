@@ -39,6 +39,10 @@ def create_app(config_name):
     from app.main import bp as main_bp
     app.register_blueprint(main_bp)
 
+    from app.ws import bp as ws_bp
+    sockets.register_blueprint(ws_bp)
+
     return app
+
 
 from app import models

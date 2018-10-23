@@ -1,21 +1,68 @@
 <!DOCTYPE HTML>
 {% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
 {% block page_content %}
 
 <html>
 <head>
-    <title>Flask/Gevent WebSocket Test</title>
+    <style>
+        #messages { list-style-type: none; margin: 0; padding: 0; }
+        #messages { list-style-type: none; margin: 0; padding: 0; }
+        #messages li:nth-child(odd) { background: #eee; }
+    </style>
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
     <script type="text/javascript" charset="utf-8">
-        $(document).ready(function(){
-            $('form').submit(function(event){
-                ws.send($('#data').val())
+        function isJson(str) {
+            try {
+                JSON.parse(str);
+            } catch (e) {
                 return false;
+            }
+            return true;
+        }
+        $(document).ready(function(){
+            $("#ws_msg").submit(function(event){
+                var msg = {};
+                msg["type"] = "message";
+                msg["text"] = $('#data').val();
+                msg["id"]   = "{{ user.username }}";
+                msg["date"] = Date.now();
+                ws.send(JSON.stringify(msg));
+                $('#data').val('');
+                return false;
+            });
+            $("#ws_file").submit(function (event) {
+                var file = document.getElementById('command_file').files[0];
+                var reader = new FileReader();
+                var msg = {};
+                msg["type"] = "byte";
+                msg["id"]   = "{{ user.username }}";
+                msg["date"] = Date.now();
+                reader.addEventListener("loadend", function(e) {
+                    msg["text"] = reader.result.toString();
+                    ws.send(JSON.stringify(msg));
+                    alert("the File has been transferred.")
+                });
+                reader.readAsBinaryString(file);
+
             });
             if ("WebSocket" in window) {
                 ws = new WebSocket("ws://" + document.domain + ":8000/echo");
                 ws.onmessage = function (msg) {
-                    $("#log").append("<p>"+msg.data+"</p>")
+                    var msg = JSON.parse(event.data);
+                    switch(msg.type){
+                        case "message":
+                            $("#messages").append($('<li>').text(msg.text));
+                            break;
+                        case "byte":
+                            $("#messages").append($('<li>').text('File Uploaded'));
+                            break;
+                        default:
+                            $("#messages").append($('<li>').text('File Uploaded'));
+                            break;
+
+                    }
                 };
             } else {
                 alert("WebSocket not supported");
@@ -23,14 +70,34 @@
         });
     </script>
 </head>
+
 <body>
-    <h1>Send:</h1>
-    <form method='POST' action='#'>
-        <textarea name='data' id="data"></textarea>
-        <div><input type='submit'></div>
+    <h1>Upload Config File:</h1>
+
+    <form id="ws_file" action='#' enctype=multipart/form-data>
+        <div class="form-group">
+            <label for="Json File">Config File</label>
+            <input type="file" class="form-control-file" id="command_file">
+        </div>
+        <button type="submit" class="btn btn-primary mb-2">Submit</button>
     </form>
+
     <h1>Receive:</h1>
-    <div id="log"></div>
+
+    <form id="ws_msg" method='POST' action='#'>
+        <div class="form-group">
+            <label for="formGroupInput">Chat Box</label>
+            <textarea type="text" class="form-control" id="data" placeholder="Message..." rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary mb-2" >Submit</button>
+    </form>
+
+    <h1>Receive:</h1>
+    <div class="list-group" id="log">
+        <label for="formGroupOutput">Message Received: </label>
+        <ul id="messages"></ul>
+    </div>
+
 </body>
 </html>
 {% endblock %}
