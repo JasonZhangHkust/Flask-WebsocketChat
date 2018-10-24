@@ -53,3 +53,14 @@ def user_popup(username):
 def chat():
     return render_template('chat.html', user=current_user)
 
+
+@bp.route('/pchat', methods=['GET', 'POST'])
+@login_required
+def pchat():
+    return render_template('persistentChat.html', user=current_user)
+
+
+@bp.route('/pchat2', methods=['GET', 'POST'])
+@login_required
+def pchat2():
+    return render_template('page_02.html', user=current_user)

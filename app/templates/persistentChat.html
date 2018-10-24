@@ -1,0 +1,83 @@
+<!doctype html>
+{% extends "base.html" %}
+
+{% block page_content %}
+
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <title>Page 1</title>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#ws_msg").submit(function (event) {
+                var msg = {};
+                msg["io"] = 0;
+                msg["type"] = "message";
+                msg["text"] = $('#data').val();
+                msg["id"] = "{{ user.username }}";
+                msg["date"] = Date.now();
+                worker.port.postMessage(msg);
+                $('#data').val('');
+                return false;
+            });
+            var worker = new SharedWorker("static/wschat.js");
+            // call start before posting
+            // post a message to the shared web worker
+            worker.port.onmessage = function(e) {
+                console.log(e.data);
+                if(typeof(e.data) === "number") {
+                    wsCounter.innerHTML = "Received WebSocket message with counter " + e.data;
+                } else {
+                    const msg = JSON.parse(e.data);
+                    switch(msg.type){
+                        case "message":
+                            $("#messages").append($('<li>').text(msg.text));
+                            break;
+                        case "file":
+                            $("#messages").append($('<li>').text('File Uploaded'));
+                            break;
+                        case "bytes":
+                            $("#messages").append($('<li>').text('Bytes'));
+                        default:
+                            $("#messages").append($('<li>').text('error'));
+                            break;
+                    }
+                }
+            };
+            worker.port.postMessage("setPersistent");
+        });
+
+   </script>
+</head>
+<body>
+   <h1>
+      Shared Web Worker Test Page 1
+   </h1>
+   <p id="persistent">
+      Setting 'persistent' = 'true;'
+   </p>
+   <p id="wsCounter">
+      Trying to start WebSocket heartbeat.
+   </p>
+   <p>
+      <a target="_blank" href={{ url_for('main.pchat2') }}>Load page 2</a>
+   </p>
+   <form id="ws_msg" method='POST' action='#'>
+       <div class="form-group">
+           <label for="formGroupInput">Chat Box</label>
+           <textarea type="text" class="form-control" id="data" placeholder="Message..." rows="3"></textarea>
+       </div>
+       <button type="submit" class="btn btn-primary mb-2" >Submit</button>
+    </form>
+
+   <h1>Receive:</h1>
+   <div class="list-group" id="log">
+       <label for="formGroupOutput">Message Received: </label>
+       <ul id="messages"></ul>
+   </div>
+
+</body>
+</html>
+
+{% endblock %}
