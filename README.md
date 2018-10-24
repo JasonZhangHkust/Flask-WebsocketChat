@@ -10,6 +10,7 @@ the alteration of the application.
 * ``Flask-Sockets`` simply wraps the low-level ``gevent-websocket`` details. 
 The websocket interface that is passed into your routes is provided by gevent-websocket. The basic methods are fairly straightforward — ``send``, ``receive``, ``send_frame``, and ``close``.
 * The app uses json format wraps the messages transfered between client and server.
+* In order to reduce websocket connections, the app uses HTML5 API ``SharedWorker`` to share websocket connection among different tabs.
 ```
 {
 "type":"message/byte",
