@@ -1,5 +1,7 @@
 # Flask-WebsocketChat
 
+## Introduction
+
 This python Flask app will interact with the websocket server.
 
 * This app supports registered users send their message or files to the backend websocket server. Now, the websocket just ehcoes the message back, later it can support more functions.
@@ -28,3 +30,7 @@ Then, in order to launch the server, the gunicorn is used to support websoket & 
 ```
 gunicorn -k flask_sockets.worker wschat:app
 ```
+## ChatRoom
+
+Implement ChatRoom with gevent.queue, further improvement can be achieved by using redis.
+
