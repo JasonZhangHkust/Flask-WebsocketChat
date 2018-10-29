@@ -64,3 +64,8 @@ def pchat():
 @login_required
 def pchat2():
     return render_template('page_02.html', user=current_user)
+
+
+@bp.route('/chatRoom', methods=['GET', 'POST'])
+def chatRoom():
+    return render_template('chat_room.html')

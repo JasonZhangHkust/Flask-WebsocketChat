@@ -46,3 +46,7 @@ def create_app(config_name):
 
 
 from app import models
+
+from app.ws.routes import chatRoom
+
+chatRoom.start()
